@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -10,7 +9,7 @@ import KalkulatorGizi from './pages/Kalkulatorgizi';
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <div className="flex flex-col min-h-screen bg-white text-gray-800 w-full">
         <Navbar />
 
@@ -29,7 +28,7 @@ function App() {
 
         <Footer />
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
 
