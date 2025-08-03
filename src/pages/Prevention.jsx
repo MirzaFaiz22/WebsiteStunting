@@ -70,16 +70,26 @@ function Prevention() {
         }
       ]
     },
+    // ...existing code...
     {
       icon: Apple,
       title: 'Protein',
       description: 'Untuk pertumbuhan dan perkembangan otot serta jaringan tubuh',
       color: 'from-green-500 to-emerald-500',
       foods: [
-        { name: 'Telur', benefit: 'Protein lengkap dengan asam amino esensial' },
-        { name: 'Ikan', benefit: 'Omega-3 untuk perkembangan otak' },
-        { name: 'Ayam', benefit: 'Protein tinggi rendah lemak' },
-        { name: 'Tahu & Tempe', benefit: 'Protein nabati dan probiotik' }
+        { name: 'Daging Sapi', benefit: '26,7gr protein per 100gr, sumber zat besi & zinc' },
+        { name: 'Daging Kambing', benefit: '20,4gr protein per 100gr, sumber energi & zat besi' },
+        { name: 'Daging Ayam', benefit: '23,1gr protein per 100gr, rendah lemak' },
+        { name: 'Daging Unggas (bebek)', benefit: '24,6gr protein per 100gr, kaya vitamin B' },
+        { name: 'Hati Ayam', benefit: '24,3gr protein per 100gr, tinggi vitamin A' },
+        { name: 'Kacang Tanah', benefit: '26gr protein per 100gr, sumber lemak sehat' },
+        { name: 'Kacang Merah', benefit: '24gr protein per 100gr, kaya serat' },
+        { name: 'Kacang Hijau', benefit: '24gr protein per 100gr, sumber folat' },
+        { name: 'Ikan Kembung', benefit: '21,3gr protein per 100gr, omega-3 tinggi' },
+        { name: 'Ikan Kakap', benefit: '20gr protein per 100gr, rendah lemak' },
+        { name: 'Ikan Lele', benefit: '17,6gr protein per 100gr, mudah dicerna' },
+        { name: 'Telur Ayam', benefit: '13gr protein per butir, protein lengkap' },
+        { name: 'Susu', benefit: '3,4gr protein per 100ml, kalsium tinggi' }
       ]
     },
     {
