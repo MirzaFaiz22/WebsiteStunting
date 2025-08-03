@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset dan normalisasi */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Optional: font default */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  
+}
+
+/* Optional link style */
+a {
+  @apply text-green-700 hover:bg-green-800;
+}
