@@ -12,10 +12,10 @@ function App() {
     <Router>
       <div className="flex flex-col min-h-screen bg-white text-gray-800 w-full">
         <Navbar />
-
+        
         {/* Main Content Area */}
-        <main className="flex-grow w-full bg-[#f3fdf6]">
-          <div className="mx-auto">
+        <main className="flex-groww-full bg-[#f3fdf6]">
+          <div className="mx-auto  ">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
