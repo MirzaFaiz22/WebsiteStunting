@@ -9,7 +9,6 @@ function Navbar() {
           <Link to="/about" className="hover:text-green-700 transition-colors duration-300">Tentang</Link>
           <Link to="/prevention" className="hover:text-green-700 transition-colors duration-300">Solusi</Link>
           <Link to="/kalkulatorgizi" className="hover:text-green-700 transition-colors duration-300">Kalkulator Gizi</Link>
-          <Link to="/contact" className="hover:text-green-700 transition-colors duration-300">Kontak</Link>
         </div>
       </div>
     </nav>
