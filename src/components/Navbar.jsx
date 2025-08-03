@@ -1,64 +1,57 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 function Navbar() {
   const [open, setOpen] = useState(false);
 
+  const navItems = [
+    { label: 'Beranda', href: '/' },
+    { label: 'Tentang', href: '/about' },
+    { label: 'Solusi', href: '/prevention' },
+    { label: 'Kalkulator Gizi', href: '/kalkulatorgizi' },
+    { label: 'Kontak', href: '/contact' },
+  ];
+
   return (
-    <nav className="sticky top-0 z-50 bg-green-50 py-4 px-2">
-      <div className="w-full flex justify-center">
-        <div className="relative bg-white/90 backdrop-blur-md shadow-md px-6 py-3 rounded-full flex items-center gap-4 text-sm md:text-base font-medium text-gray-800 max-w-full">
-          {/* Hamburger button */}
+    <nav className="sticky top-0 z-50 bg-green-50 py-4 px-4">
+      <div className="w-full flex justify-between items-center">
+        {/* Desktop nav - oval */}
+        <div className="hidden md:flex bg-white/90 backdrop-blur-md shadow-md px-8 py-3 rounded-full space-x-6 text-sm md:text-base font-medium text-gray-800 mx-auto">
+          {navItems.map((item, idx) => (
+            <Link
+              key={idx}
+              to={item.href}
+              className="hover:text-green-700 transition-colors duration-300"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Mobile nav button */}
+        <div className="md:hidden ml-auto">
           <button
-            className="md:hidden text-gray-700"
             onClick={() => setOpen(!open)}
+            className="p-2 bg-white rounded-full shadow-md"
           >
-            {open ? <X size={20} /> : <Menu size={20} />}
+            {open ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* Menu Links */}
-          <div
-            className={`absolute top-full left-0 w-full mt-2 bg-white rounded-lg shadow-md p-4 flex flex-col gap-3 md:static md:w-auto md:bg-transparent md:shadow-none md:p-0 md:flex-row md:items-center md:gap-x-4 md:gap-y-0 ${
-              open ? 'block' : 'hidden md:flex'
-            }`}
-          >
-            <Link
-              to="/"
-              onClick={() => setOpen(false)}
-              className="hover:text-green-700 transition-colors duration-300"
-            >
-              Beranda
-            </Link>
-            <Link
-              to="/about"
-              onClick={() => setOpen(false)}
-              className="hover:text-green-700 transition-colors duration-300"
-            >
-              Tentang
-            </Link>
-            <Link
-              to="/prevention"
-              onClick={() => setOpen(false)}
-              className="hover:text-green-700 transition-colors duration-300"
-            >
-              Solusi
-            </Link>
-            <Link
-              to="/kalkulatorgizi"
-              onClick={() => setOpen(false)}
-              className="hover:text-green-700 transition-colors duration-300"
-            >
-              Kalkulator Gizi
-            </Link>
-            <Link
-              to="/contact"
-              onClick={() => setOpen(false)}
-              className="hover:text-green-700 transition-colors duration-300"
-            >
-              Kontak
-            </Link>
-          </div>
+          {open && (
+            <div className="absolute right-4 mt-2 bg-white shadow-lg rounded-xl p-4 space-y-3 z-50">
+              {navItems.map((item, idx) => (
+                <Link
+                  key={idx}
+                  to={item.href}
+                  onClick={() => setOpen(false)}
+                  className="block text-sm font-medium text-gray-700 hover:text-green-700 transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </nav>
