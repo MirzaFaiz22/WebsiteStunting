@@ -1,16 +1,15 @@
-import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Link } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
 
   const navItems = [
-    { label: 'Beranda', href: '/' },
-    { label: 'Tentang', href: '/about' },
-    { label: 'Solusi', href: '/prevention' },
-    { label: 'Kalkulator Gizi', href: '/kalkulatorgizi' },
-    { label: 'Kontak', href: '/contact' },
+    { label: "Beranda", href: "/" },
+    { label: "Tentang", href: "/about" },
+    { label: "Solusi", href: "/prevention" },
+    { label: "Kalkulator Gizi", href: "/kalkulatorgizi" },
   ];
 
   return (
