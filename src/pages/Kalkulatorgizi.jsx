@@ -309,7 +309,7 @@ function KalkulatorGizi() {
                     {hasil.stunting.icon}
                     <div>
                       <span className="font-bold">
-                        Status Tinggi/Usia: {hasil.stunting.status}
+                        Status Stunting: {hasil.stunting.status}
                       </span>
                       <span className="block text-sm text-gray-700">
                         {hasil.stunting.desc}
