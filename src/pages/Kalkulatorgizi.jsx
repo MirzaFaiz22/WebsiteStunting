@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Heart, Shield, TrendingUp, Star, AlertTriangle } from "lucide-react";
 
 function KalkulatorGizi() {
-  const [usiaTahun, setUsiaTahun] = useState("");
   const [usiaBulan, setUsiaBulan] = useState("");
   const [jenisKelamin, setJenisKelamin] = useState("");
   const [berat, setBerat] = useState("");
@@ -10,7 +9,7 @@ function KalkulatorGizi() {
   const [hasil, setHasil] = useState(null);
 
   // Ambang batas stunting WHO (TB/U) untuk anak laki-laki & perempuan (rata-rata, cm)
-  // Sumber: WHO Child Growth Standards (2006), z-score -3 dan -2 (hanya sebagian data, bisa dikembangkan)
+  // Sumber: WHO Child Growth Standards (2006), z-score -3 dan -2
   const ambangStunting = [
     // usia dalam bulan: [z-score -3, z-score -2]
     { bulan: 0, L: [44.2, 45.4], P: [43.6, 44.7] },
@@ -25,6 +24,25 @@ function KalkulatorGizi() {
     { bulan: 36, L: [87.4, 89.5], P: [85.1, 87.1] },
     { bulan: 48, L: [93.0, 95.0], P: [90.7, 92.7] },
     { bulan: 60, L: [97.8, 99.9], P: [95.1, 97.0] },
+  ];
+
+  // Ambang batas Weight-for-Height WHO (BB/TB) untuk anak laki-laki & perempuan (kg)
+  // Sumber: WHO Child Growth Standards (2006), z-score -3, -2, +2
+  const ambangWeightForHeight = [
+    // tinggi dalam cm: [z-score -3, z-score -2, z-score +2]
+    { tinggi: 45, L: [1.9, 2.1, 2.9], P: [1.8, 2.0, 2.8] },
+    { tinggi: 50, L: [2.6, 2.9, 4.0], P: [2.5, 2.8, 3.8] },
+    { tinggi: 55, L: [3.4, 3.8, 5.3], P: [3.2, 3.6, 5.0] },
+    { tinggi: 60, L: [4.4, 4.9, 6.8], P: [4.2, 4.6, 6.4] },
+    { tinggi: 65, L: [5.5, 6.1, 8.5], P: [5.2, 5.8, 8.0] },
+    { tinggi: 70, L: [6.7, 7.5, 10.4], P: [6.4, 7.0, 9.8] },
+    { tinggi: 75, L: [8.1, 9.0, 12.5], P: [7.7, 8.5, 11.8] },
+    { tinggi: 80, L: [9.6, 10.6, 14.8], P: [9.1, 10.1, 14.0] },
+    { tinggi: 85, L: [11.2, 12.4, 17.3], P: [10.7, 11.8, 16.4] },
+    { tinggi: 90, L: [12.9, 14.2, 19.9], P: [12.4, 13.7, 19.0] },
+    { tinggi: 95, L: [14.8, 16.3, 22.7], P: [14.2, 15.7, 21.8] },
+    { tinggi: 100, L: [16.7, 18.4, 25.6], P: [16.1, 17.9, 24.9] },
+    { tinggi: 110, L: [20.9, 23.1, 32.5], P: [20.3, 22.6, 31.9] },
   ];
 
   // Fungsi interpolasi ambang batas stunting
@@ -51,18 +69,76 @@ function KalkulatorGizi() {
     return { minus3: last[jk][0], minus2: last[jk][1] };
   }
 
+  // Fungsi interpolasi ambang batas Weight-for-Height
+  function getWeightForHeightLimit(tinggiCm, jk) {
+    if (tinggiCm < 0 || (jk !== "L" && jk !== "P"))
+      return { minus3: 0, minus2: 0, plus2: 0 };
+
+    let prev = ambangWeightForHeight[0];
+    for (let i = 1; i < ambangWeightForHeight.length; i++) {
+      const curr = ambangWeightForHeight[i];
+      if (tinggiCm === curr.tinggi)
+        return { minus3: curr[jk][0], minus2: curr[jk][1], plus2: curr[jk][2] };
+      if (tinggiCm < curr.tinggi) {
+        // Linear interpolation
+        const ratio = (tinggiCm - prev.tinggi) / (curr.tinggi - prev.tinggi);
+        return {
+          minus3: prev[jk][0] + (curr[jk][0] - prev[jk][0]) * ratio,
+          minus2: prev[jk][1] + (curr[jk][1] - prev[jk][1]) * ratio,
+          plus2: prev[jk][2] + (curr[jk][2] - prev[jk][2]) * ratio,
+        };
+      }
+      prev = curr;
+    }
+    // Jika tinggi di atas data, pakai data terakhir
+    const last = ambangWeightForHeight[ambangWeightForHeight.length - 1];
+    return { minus3: last[jk][0], minus2: last[jk][1], plus2: last[jk][2] };
+  }
+
+  // Fungsi untuk menentukan status Weight-for-Height berdasarkan WHO
+  function getWeightForHeightStatus(berat, tinggi, jenisKelamin) {
+    const batas = getWeightForHeightLimit(tinggi, jenisKelamin);
+
+    if (berat < batas.minus3) {
+      return {
+        status: "Severely Wasted (Gizi Buruk)",
+        color: "text-red-600",
+        icon: <AlertTriangle className="inline w-4 h-4 mr-1 text-red-600" />,
+        desc: "Berat badan sangat kurang untuk tinggi badan (z-score < -3 SD)",
+      };
+    } else if (berat < batas.minus2) {
+      return {
+        status: "Wasted (Kurus)",
+        color: "text-yellow-600",
+        icon: <AlertTriangle className="inline w-4 h-4 mr-1 text-yellow-600" />,
+        desc: "Berat badan kurang untuk tinggi badan (z-score < -2 SD)",
+      };
+    } else if (berat <= batas.plus2) {
+      return {
+        status: "Normal",
+        color: "text-emerald-600",
+        icon: <TrendingUp className="inline w-4 h-4 mr-1 text-emerald-600" />,
+        desc: "Berat badan normal untuk tinggi badan",
+      };
+    } else {
+      return {
+        status: "Overweight (Gemuk)",
+        color: "text-orange-600",
+        icon: <AlertTriangle className="inline w-4 h-4 mr-1 text-orange-600" />,
+        desc: "Berat badan berlebih untuk tinggi badan (z-score > +2 SD)",
+      };
+    }
+  }
+
   const hitungGizi = (e) => {
     e.preventDefault();
 
-    const tahun = parseInt(usiaTahun, 10);
-    const bulan = parseInt(usiaBulan, 10);
+    const totalBulan = parseInt(usiaBulan, 10);
     const beratNum = parseFloat(berat);
     const tinggiNum = parseFloat(tinggi);
-    const totalBulan = tahun * 12 + bulan;
 
     if (
-      isNaN(tahun) ||
-      isNaN(bulan) ||
+      isNaN(totalBulan) ||
       isNaN(beratNum) ||
       isNaN(tinggiNum) ||
       jenisKelamin === "" ||
@@ -73,37 +149,6 @@ function KalkulatorGizi() {
       setHasil({ error: "Mohon isi semua data dengan benar." });
       return;
     }
-
-    // Estimasi kebutuhan energi (WHO 2001-2007 & Kemenkes 2019, kasar)
-    let energi = 0;
-    if (jenisKelamin === "L") {
-      if (totalBulan <= 6) energi = 550;
-      else if (totalBulan <= 12) energi = 700;
-      else if (totalBulan <= 36) energi = 1000;
-      else if (totalBulan <= 72) energi = 1350;
-      else if (totalBulan <= 108) energi = 1700;
-      else energi = 2100;
-    } else {
-      if (totalBulan <= 6) energi = 500;
-      else if (totalBulan <= 12) energi = 650;
-      else if (totalBulan <= 36) energi = 950;
-      else if (totalBulan <= 72) energi = 1250;
-      else if (totalBulan <= 108) energi = 1600;
-      else energi = 2000;
-    }
-
-    // Estimasi protein (gram/hari)
-    let protein = 0;
-    if (totalBulan <= 12) protein = 13;
-    else if (totalBulan <= 36) protein = 15;
-    else if (totalBulan <= 72) protein = 20;
-    else if (totalBulan <= 108) protein = 28;
-    else protein = 40;
-
-    // Cairan = 100 mL x berat (ml/hari)
-    const cairan = Math.round(beratNum * 100);
-
-    const imt = (beratNum / (tinggiNum / 100) ** 2).toFixed(2);
 
     // Perhitungan status stunting
     let stunting = null;
@@ -135,7 +180,10 @@ function KalkulatorGizi() {
       }
     }
 
-    setHasil({ energi, protein, cairan, imt, stunting });
+    // Perhitungan Weight-for-Height
+    const weightForHeight = getWeightForHeightStatus(beratNum, tinggiNum, jenisKelamin);
+
+    setHasil({ stunting, weightForHeight });
   };
 
   return (
@@ -144,40 +192,27 @@ function KalkulatorGizi() {
         <div className="flex items-center space-x-3 mb-6">
           <Star className="w-7 h-7 text-emerald-500" />
           <h2 className="text-2xl font-bold text-emerald-700">
-            Kalkulator Gizi Anak
+            Evaluasi Status Gizi Anak
           </h2>
         </div>
         <form onSubmit={hitungGizi} className="space-y-4">
-          <div className="flex space-x-2">
-            <div className="w-1/2">
-              <label className="block text-gray-700 font-medium mb-1">
-                Usia (tahun)
-              </label>
-              <input
-                type="number"
-                min="0"
-                className="w-full border border-emerald-200 rounded-lg px-4 py-2"
-                value={usiaTahun}
-                onChange={(e) => setUsiaTahun(e.target.value)}
-                placeholder="0–18"
-                required
-              />
-            </div>
-            <div className="w-1/2">
-              <label className="block text-gray-700 font-medium mb-1">
-                Usia (bulan)
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="11"
-                className="w-full border border-emerald-200 rounded-lg px-4 py-2"
-                value={usiaBulan}
-                onChange={(e) => setUsiaBulan(e.target.value)}
-                placeholder="0–11"
-                required
-              />
-            </div>
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">
+              Usia (bulan)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="60"
+              className="w-full border border-emerald-200 rounded-lg px-4 py-2"
+              value={usiaBulan}
+              onChange={(e) => setUsiaBulan(e.target.value)}
+              placeholder="Contoh: 24 (untuk usia 2 tahun)"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              *Untuk anak usia 0-60 bulan (0-5 tahun)
+            </p>
           </div>
 
           <div>
@@ -232,7 +267,7 @@ function KalkulatorGizi() {
             type="submit"
             className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-2 rounded-lg shadow hover:from-emerald-700 hover:to-teal-700 transition"
           >
-            Hitung Kebutuhan Gizi
+            Evaluasi Status Gizi
           </button>
         </form>
 
@@ -242,51 +277,51 @@ function KalkulatorGizi() {
               <p className="text-red-600 font-semibold">{hasil.error}</p>
             ) : (
               <>
-                <div className="flex items-center space-x-2 mb-2">
+                <div className="flex items-center space-x-2 mb-4">
                   <TrendingUp className="w-5 h-5 text-emerald-600" />
                   <span className="font-semibold text-emerald-700">
-                    Hasil Perkiraan Gizi Harian:
+                    Hasil Evaluasi Status Gizi:
                   </span>
                 </div>
-                <ul className="space-y-2 text-gray-700">
-                  <li>
-                    <Heart className="inline w-4 h-4 mr-1 text-pink-500" />
-                    <span className="font-medium">Energi:</span> {hasil.energi}{" "}
-                    kkal/hari
-                  </li>
-                  <li>
-                    <Star className="inline w-4 h-4 mr-1 text-yellow-500" />
-                    <span className="font-medium">Protein:</span>{" "}
-                    {hasil.protein} gram/hari
-                  </li>
-                  <li>
-                    <Shield className="inline w-4 h-4 mr-1 text-teal-500" />
-                    <span className="font-medium">Cairan:</span> {hasil.cairan}{" "}
-                    ml/hari
-                  </li>
-                  <li>
-                    <TrendingUp className="inline w-4 h-4 mr-1 text-emerald-500" />
-                    <span className="font-medium">IMT:</span> {hasil.imt}
-                  </li>
-                </ul>
-                {/* Hasil status stunting */}
+
+                {/* Status Weight-for-Height */}
+                {hasil.weightForHeight && (
+                  <div
+                    className={`mb-4 p-4 rounded-xl bg-white flex items-center shadow ${hasil.weightForHeight.color}`}
+                  >
+                    {hasil.weightForHeight.icon}
+                    <div>
+                      <span className="font-bold">
+                        Status Gizi: {hasil.weightForHeight.status}
+                      </span>
+                      <span className="block text-sm text-gray-700">
+                        {hasil.weightForHeight.desc}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Status Stunting */}
                 {hasil.stunting && (
                   <div
-                    className={`mt-6 p-4 rounded-xl bg-white flex items-center shadow ${hasil.stunting.color}`}
+                    className={`p-4 rounded-xl bg-white flex items-center shadow ${hasil.stunting.color}`}
                   >
                     {hasil.stunting.icon}
                     <div>
-                      <span className="font-bold">{hasil.stunting.status}</span>
+                      <span className="font-bold">
+                        Status Tinggi/Usia: {hasil.stunting.status}
+                      </span>
                       <span className="block text-sm text-gray-700">
                         {hasil.stunting.desc}
                       </span>
                     </div>
                   </div>
                 )}
+
                 <p className="text-xs text-gray-500 mt-4">
-                  *Data bersifat estimasi berdasarkan usia, jenis kelamin, dan
-                  standar WHO. Untuk diagnosis lebih akurat, konsultasikan
-                  dengan tenaga medis.
+                  *Evaluasi berdasarkan standar WHO Child Growth Standards 2006.
+                  Untuk diagnosis dan penanganan lebih lanjut, konsultasikan
+                  dengan tenaga kesehatan.
                 </p>
               </>
             )}
